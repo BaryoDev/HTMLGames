@@ -252,10 +252,18 @@
 
         const LEADERBOARD_KEY = 'flappyLeaderboard_v1';
 
+        function loadScores() {
+            try {
+                const parsed = JSON.parse(localStorage.getItem(LEADERBOARD_KEY));
+                return Array.isArray(parsed) ? parsed : [];
+            } catch (e) {
+                return [];
+            }
+        }
+
         function saveScore(name, points) {
             // 1. Get existing data
-            let data = localStorage.getItem(LEADERBOARD_KEY);
-            let scores = data ? JSON.parse(data) : [];
+            let scores = loadScores();
 
             // Normalize name (trim and default)
             const cleanName = (name || "Anonymous").trim();
@@ -307,8 +315,7 @@
         }
 
         function updateLeaderboardUI(currentRunEntry) {
-            let data = localStorage.getItem(LEADERBOARD_KEY);
-            let scores = data ? JSON.parse(data) : [];
+            let scores = loadScores();
 
             leaderboardBody.innerHTML = ""; // Clear old rows
 
@@ -326,11 +333,11 @@
                     tr.classList.add('highlight-run');
                 }
 
-                tr.innerHTML = `
-            <td>${index + 1}</td>
-            <td>${entry.name}</td>
-            <td>${entry.score}</td>
-        `;
+                [index + 1, entry.name, entry.score].forEach(v => {
+                    const td = document.createElement('td');
+                    td.textContent = v;
+                    tr.appendChild(td);
+                });
                 leaderboardBody.appendChild(tr);
             });
         }
